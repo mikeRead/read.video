@@ -206,8 +206,8 @@ export const optimizeForMobile = (scene: THREE.Scene, camera: THREE.PerspectiveC
     const mobile = isMobile()
 
     if (mobile) {
-        // Reduce camera far plane for better performance
-        camera.far = 30000
+        // Keep camera far plane high enough to see the nebula (radius 35000)
+        camera.far = 40000
         camera.updateProjectionMatrix()
 
         // Reduce fog density if present (only for exponential fog)
