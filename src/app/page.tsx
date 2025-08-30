@@ -372,13 +372,17 @@ export default function HomePage() {
     }
 
     const filmPass = FilmGrainPass({
-      noiseIntensity: () => THREE.MathUtils.lerp(0.04, 0.08, Math.random()),
+      noiseIntensity: () => mobileOpts.msaaSamples === 0
+        ? THREE.MathUtils.lerp(0.1, 0.15, Math.random())  // Higher film grain on mobile
+        : THREE.MathUtils.lerp(0.05, 0.1, Math.random()), // Normal film grain on desktop
       scanlineIntensity: () => 0,
       scanlineCount: () => 720.0,
       vignette: () => .5,
       chroma: getAnimatedChroma,
       jitter: () => 0,
-      glitchStrength: () => THREE.MathUtils.lerp(0.008, 0.02, Math.random()),
+      glitchStrength: () => mobileOpts.msaaSamples === 0
+        ? THREE.MathUtils.lerp(0.018, 0.025, Math.random())
+        : THREE.MathUtils.lerp(0.028, 0.035, Math.random()),
       glitchBandHeight: () => THREE.MathUtils.lerp(0.015, 0.06, Math.random()),
       glitchScrollSpeed: () => THREE.MathUtils.lerp(0.7, 1.1, Math.random()),
       getGlitchIntervalSeconds: () => THREE.MathUtils.randFloat(1.0, 5.0),
