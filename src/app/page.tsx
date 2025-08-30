@@ -247,25 +247,24 @@ export default function HomePage() {
     // Set up the renderer with mobile-optimized settings
     const renderer = new THREE.WebGLRenderer({
       antialias: mobileOpts.msaaSamples > 0,
-      powerPreference: mobileOpts.disableEffects ? "default" : "high-performance",
-      logarithmicDepthBuffer: !mobileOpts.disableEffects,  // Can cause issues on mobile
+      powerPreference: "high-performance",
+      logarithmicDepthBuffer: true,
       stencil: false,
       depth: true,
       alpha: false,
       premultipliedAlpha: false,
       preserveDrawingBuffer: false,
       failIfMajorPerformanceCaveat: false,
-      // Mobile-specific WebGL settings to prevent errors
-      precision: mobileOpts.disableEffects ? "mediump" : "highp"
+      precision: "highp"
     })
 
     // Enable MSAA (Multi-Sample Anti-Aliasing) for better quality and reduce banding
     renderer.outputColorSpace = THREE.SRGBColorSpace
     renderer.toneMapping = THREE.ACESFilmicToneMapping
     renderer.toneMappingExposure = 1.0
-    renderer.setPixelRatio(mobileOpts.disableEffects ? Math.min(window.devicePixelRatio, 1) : Math.min(window.devicePixelRatio, 2))
-    renderer.shadowMap.enabled = mobileOpts.enableShadows
-    renderer.shadowMap.type = mobileOpts.enableShadows ? THREE.PCFSoftShadowMap : THREE.BasicShadowMap
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    renderer.shadowMap.enabled = true
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap
     renderer.setSize(window.innerWidth, window.innerHeight)
     mountRef.current.appendChild(renderer.domElement)
 
@@ -275,25 +274,7 @@ export default function HomePage() {
       // You could implement scene recreation logic here
     })
 
-    // Add mobile WebGL error handling
-    if (mobileOpts.disableEffects) {
-      const canvas = renderer.domElement
-      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl')
 
-      if (gl) {
-        // Override console.error to catch WebGL errors on mobile
-        const originalError = console.error
-        console.error = (...args) => {
-          if (args[0] && typeof args[0] === 'string' && args[0].includes('GL ERROR')) {
-            console.warn('🔧 Mobile WebGL error caught, continuing with fallback rendering')
-            return
-          }
-          originalError.apply(console, args)
-        }
-
-        console.log('🔧 Mobile WebGL error handling enabled')
-      }
-    }
 
     // Create color enhancement shader
     const colorEnhancementShader = {
@@ -340,35 +321,27 @@ export default function HomePage() {
       `
     }
 
-    // Create render target (mobile-optimized to prevent WebGL errors)
-    let renderTarget: THREE.WebGLRenderTarget | null = null
+    // Create render target for post-processing
+    const renderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, {
+      type: THREE.HalfFloatType,
+      format: THREE.RGBAFormat,
+      minFilter: THREE.LinearFilter,
+      magFilter: THREE.LinearFilter,
+      depthBuffer: true,
+      stencilBuffer: false,
+      samples: mobileOpts.msaaSamples
+    })
 
-    if (mobileOpts.useRenderTarget && webglCompatible) {
-      renderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, {
-        type: mobileOpts.useHalfFloat ? THREE.HalfFloatType : THREE.UnsignedByteType,
-        format: THREE.RGBAFormat,
-        minFilter: THREE.LinearFilter,
-        magFilter: THREE.LinearFilter,
-        depthBuffer: true,
-        stencilBuffer: false,
-        samples: mobileOpts.msaaSamples
-      })
+    // Create depth texture for depth-based effects
+    renderTarget.depthTexture = new THREE.DepthTexture(window.innerWidth, window.innerHeight, THREE.UnsignedShortType)
 
-      if (mobileOpts.useDepthTexture) {
-        renderTarget.depthTexture = new THREE.DepthTexture(window.innerWidth, window.innerHeight, THREE.UnsignedShortType)
-      }
-    }
-
-    // Create post-processing effect with custom target (mobile-optimized)
+    // Create post-processing effect with custom target
     let effectComposer: EffectComposer
 
-    if (renderTarget && !mobileOpts.disableEffects) {
-      // Use custom render target for desktop
+    if (renderTarget) {
       effectComposer = new EffectComposer(renderer, renderTarget)
     } else {
-      // Use default render target for mobile to prevent WebGL errors
       effectComposer = new EffectComposer(renderer)
-      console.log('🔧 Using default render target for mobile compatibility')
     }
 
     const renderPass = new RenderPass(scene, camera)
@@ -383,14 +356,17 @@ export default function HomePage() {
     let glitchDuration = 0
 
     const getAnimatedChroma = () => {
-      if (!isGlitchActive) return mobileOpts.chromaIntensity // Mobile-optimized normal chroma
+      // Disable chroma on mobile to prevent visual issues
+      if (mobileOpts.msaaSamples === 0) return 0
+
+      if (!isGlitchActive) return 0.005 // Normal chroma
 
       const elapsed = performance.now() - glitchStartTime
       const progress = elapsed / glitchDuration
 
-      // Create pulsing chroma effect during glitch (mobile-optimized)
+      // Create pulsing chroma effect during glitch
       const pulse = Math.sin(progress * Math.PI * 8) * 0.5 + 0.5 // 8 pulses over glitch duration
-      const intensity = THREE.MathUtils.lerp(mobileOpts.chromaIntensity * 2, mobileOpts.chromaIntensity * 4, pulse)
+      const intensity = THREE.MathUtils.lerp(0.005 * 2, 0.005 * 4, pulse)
 
       return intensity
     }
@@ -405,7 +381,7 @@ export default function HomePage() {
       glitchStrength: () => THREE.MathUtils.lerp(0.008, 0.02, Math.random()),
       glitchBandHeight: () => THREE.MathUtils.lerp(0.015, 0.06, Math.random()),
       glitchScrollSpeed: () => THREE.MathUtils.lerp(0.7, 1.1, Math.random()),
-      getGlitchIntervalSeconds: () => THREE.MathUtils.randFloat(1.0, mobileOpts.glitchInterval / 1000),
+      getGlitchIntervalSeconds: () => THREE.MathUtils.randFloat(1.0, 5.0),
       getGlitchDurationSeconds: () => THREE.MathUtils.randFloat(.5, .6)
     })
       ; (filmPass as { renderToScreen?: boolean }).renderToScreen = true
@@ -425,7 +401,7 @@ export default function HomePage() {
     const stars: THREE.Vector3[] = []
 
     // Create a loop to generate random stars (mobile-optimized count)
-    for (let i = 0; i < mobileOpts.maxStars; i++) {
+    for (let i = 0; i < 25000; i++) {
       const star = new THREE.Vector3()
       star.x = THREE.MathUtils.randFloatSpread(50000)
       star.y = THREE.MathUtils.randFloatSpread(20000)
@@ -484,7 +460,7 @@ export default function HomePage() {
       return texture
     }
 
-    const starSpriteTexture = generateStarTexture(mobileOpts.textureSize)
+    const starSpriteTexture = generateStarTexture(128)
     const starSpriteMaterial = new THREE.SpriteMaterial({
       map: starSpriteTexture,
       color: 0xffffff,
@@ -494,7 +470,7 @@ export default function HomePage() {
     })
 
     // ---------------- Small particles (dust) ----------------
-    const particleCount = mobileOpts.maxParticles
+    const particleCount = 4000
     const particleRange = 5000
     const particlePositions = new Float32Array(particleCount * 3)
     for (let i = 0; i < particleCount; i++) {
@@ -761,7 +737,7 @@ export default function HomePage() {
     const randomPlanet = createRandomPlanet()
 
     // Add some random planets with rings initially (mobile-optimized count)
-    for (let i = 0; i < mobileOpts.maxPlanets; i++) {
+    for (let i = 0; i < 15; i++) {
       addRandomPlanetWithRings()
     }
 
@@ -1122,13 +1098,11 @@ export default function HomePage() {
       const height = window.innerHeight
       renderer.setSize(width, height)
 
-      // Only resize render target if it exists
-      if (renderTarget) {
-        renderTarget.setSize(width, height)
-        if (renderTarget.depthTexture) {
-          renderTarget.depthTexture.image.width = width
-          renderTarget.depthTexture.image.height = height
-        }
+      // Resize render target
+      renderTarget.setSize(width, height)
+      if (renderTarget.depthTexture) {
+        renderTarget.depthTexture.image.width = width
+        renderTarget.depthTexture.image.height = height
       }
 
       effectComposer.setSize(width, height)

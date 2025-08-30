@@ -18,86 +18,30 @@ export const isAndroid = () => {
 }
 
 export const getMobileOptimizations = () => {
-  const mobile = isMobile()
-  
-  // Show mobile indicator if mobile mode is active
-  if (mobile) {
-    showMobileIndicator()
-  }
+    const mobile = isMobile()
 
     return {
-        // Reduce star count on mobile
-        maxStars: mobile ? 15000 : 25000,
+        // Keep original values - only MSAA was causing issues
+        maxStars: 25000,
+        maxParticles: 4000,
+        maxPlanets: 15,
+        disableEffects: false,
 
-        // Reduce particle count
-        maxParticles: mobile ? 2000 : 4000,
-
-        // Reduce planet count
-        maxPlanets: mobile ? 8 : 15,
-
-        // Disable expensive effects on mobile
-        disableEffects: mobile,
-
-        // Completely disable MSAA on mobile to prevent WebGL errors
+        // Only disable MSAA on mobile to prevent WebGL errors
         msaaSamples: mobile ? 0 : 4,
 
-        // Use lower precision on mobile
-        useHalfFloat: !mobile,
-
-        // Reduce texture sizes
-        textureSize: mobile ? 64 : 128,
-
-        // Disable shadows on mobile
-        enableShadows: !mobile,
-
-        // Reduce glitch frequency
-        glitchInterval: mobile ? 8000 : 5000,
-
-        // Lower chroma intensity on mobile
-        chromaIntensity: mobile ? 0.003 : 0.005,
-
-        // Disable render target on mobile to prevent WebGL errors
-        useRenderTarget: !mobile,
-
-        // Use basic depth texture on mobile
-        useDepthTexture: !mobile
+        // Keep original values
+        useHalfFloat: true,
+        textureSize: 128,
+        enableShadows: true,
+        glitchInterval: 5000,
+        chromaIntensity: 0.005,
+        useRenderTarget: true,
+        useDepthTexture: true
     }
 }
 
-// Show a visual indicator when mobile mode is active
-const showMobileIndicator = () => {
-    // Remove existing indicator if present
-    const existing = document.getElementById('mobile-indicator')
-    if (existing) existing.remove()
 
-    const indicator = document.createElement('div')
-    indicator.id = 'mobile-indicator'
-    indicator.style.cssText = `
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    background: #ff6b6b;
-    color: white;
-    padding: 8px 12px;
-    border-radius: 20px;
-    font-family: Arial, sans-serif;
-    font-size: 12px;
-    font-weight: bold;
-    z-index: 10000;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-    pointer-events: none;
-  `
-    indicator.textContent = '📱 MOBILE MODE'
-
-    document.body.appendChild(indicator)
-
-    // Auto-hide after 5 seconds
-    setTimeout(() => {
-        if (indicator.parentElement) {
-            indicator.style.opacity = '0.7'
-        }
-    }, 5000)
-}
 
 // Debug function to show current mobile optimizations
 export const debugMobileOptimizations = () => {
