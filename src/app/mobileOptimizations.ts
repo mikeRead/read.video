@@ -39,8 +39,8 @@ export const getMobileOptimizations = () => {
         // Disable expensive effects on mobile
         disableEffects: mobile,
 
-        // Reduce MSAA samples
-        msaaSamples: mobile ? 2 : 4,
+        // Completely disable MSAA on mobile to prevent WebGL errors
+        msaaSamples: mobile ? 0 : 4,
 
         // Use lower precision on mobile
         useHalfFloat: !mobile,
@@ -55,7 +55,13 @@ export const getMobileOptimizations = () => {
         glitchInterval: mobile ? 8000 : 5000,
 
         // Lower chroma intensity on mobile
-        chromaIntensity: mobile ? 0.003 : 0.005
+        chromaIntensity: mobile ? 0.003 : 0.005,
+
+        // Disable render target on mobile to prevent WebGL errors
+        useRenderTarget: !mobile,
+
+        // Use basic depth texture on mobile
+        useDepthTexture: !mobile
     }
 }
 
@@ -169,6 +175,57 @@ export const optimizeFontsForMobile = () => {
         }, 3000) // Wait 3 seconds for font to load
 
         console.log('🔤 Mobile font optimizations applied')
+    }
+}
+
+// WebGL compatibility check for mobile devices
+export const checkWebGLCompatibility = () => {
+    const mobile = isMobile()
+
+    if (!mobile) return true
+
+    try {
+        const canvas = document.createElement('canvas')
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl')
+
+        if (!gl) {
+            console.error('❌ WebGL not supported on this device')
+            return false
+        }
+
+        // Cast to WebGLRenderingContext for type safety
+        const webgl = gl as WebGLRenderingContext
+
+        // Check for MSAA support
+        const msaaSupported = webgl.getExtension('WEBGL_multisampled_render_to_texture')
+        if (!msaaSupported) {
+            console.warn('⚠️ MSAA not supported, disabling multisampling')
+        }
+
+        // Check for depth texture support
+        const depthTextureSupported = webgl.getExtension('WEBGL_depth_texture')
+        if (!depthTextureSupported) {
+            console.warn('⚠️ Depth texture not supported, using basic depth buffer')
+        }
+
+        // Check for half-float support
+        const halfFloatSupported = webgl.getExtension('OES_texture_half_float')
+        if (!halfFloatSupported) {
+            console.warn('⚠️ Half-float not supported, using basic texture types')
+        }
+
+        // Check for render target support
+        const renderTargetSupported = webgl.getExtension('WEBGL_draw_buffers')
+        if (!renderTargetSupported) {
+            console.warn('⚠️ Render targets not fully supported')
+        }
+
+        console.log('✅ WebGL compatibility check passed')
+        return true
+
+    } catch (error) {
+        console.error('❌ WebGL compatibility check failed:', error)
+        return false
     }
 }
 

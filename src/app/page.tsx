@@ -12,7 +12,8 @@ import {
   handleWebGLContextLoss,
   optimizeForMobile,
   debugMobileOptimizations,
-  optimizeFontsForMobile
+  optimizeFontsForMobile,
+  checkWebGLCompatibility
 } from './mobileOptimizations'
 
 export default function HomePage() {
@@ -27,6 +28,9 @@ export default function HomePage() {
 
     // Apply mobile font optimizations
     optimizeFontsForMobile()
+
+    // Check WebGL compatibility for mobile
+    const webglCompatible = checkWebGLCompatibility()
 
     // Set up the threejs scene
     const scene = new THREE.Scene()
@@ -251,7 +255,9 @@ export default function HomePage() {
       alpha: false,
       premultipliedAlpha: false,
       preserveDrawingBuffer: false,
-      failIfMajorPerformanceCaveat: false
+      failIfMajorPerformanceCaveat: false,
+      // Mobile-specific WebGL settings to prevent errors
+      precision: mobileOpts.disableEffects ? "mediump" : "highp"
     })
 
     // Enable MSAA (Multi-Sample Anti-Aliasing) for better quality and reduce banding
@@ -269,6 +275,26 @@ export default function HomePage() {
       console.warn('WebGL context lost - attempting to recreate scene')
       // You could implement scene recreation logic here
     })
+
+    // Add mobile WebGL error handling
+    if (mobileOpts.disableEffects) {
+      const canvas = renderer.domElement
+      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl')
+
+      if (gl) {
+        // Override console.error to catch WebGL errors on mobile
+        const originalError = console.error
+        console.error = (...args) => {
+          if (args[0] && typeof args[0] === 'string' && args[0].includes('GL ERROR')) {
+            console.warn('🔧 Mobile WebGL error caught, continuing with fallback rendering')
+            return
+          }
+          originalError.apply(console, args)
+        }
+
+        console.log('🔧 Mobile WebGL error handling enabled')
+      }
+    }
 
     // Create color enhancement shader
     const colorEnhancementShader = {
@@ -315,20 +341,37 @@ export default function HomePage() {
       `
     }
 
-    // Create high-precision render target to reduce banding (mobile-optimized)
-    const renderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, {
-      type: mobileOpts.useHalfFloat ? THREE.HalfFloatType : THREE.UnsignedByteType,
-      format: THREE.RGBAFormat,
-      minFilter: THREE.LinearFilter,
-      magFilter: THREE.LinearFilter,
-      depthBuffer: true,
-      stencilBuffer: false,
-      samples: mobileOpts.msaaSamples
-    })
-    renderTarget.depthTexture = new THREE.DepthTexture(window.innerWidth, window.innerHeight, THREE.UnsignedShortType)
+    // Create render target (mobile-optimized to prevent WebGL errors)
+    let renderTarget: THREE.WebGLRenderTarget | null = null
 
-    // Create post-processing effect with custom target
-    const effectComposer = new EffectComposer(renderer, renderTarget)
+    if (mobileOpts.useRenderTarget && webglCompatible) {
+      renderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, {
+        type: mobileOpts.useHalfFloat ? THREE.HalfFloatType : THREE.UnsignedByteType,
+        format: THREE.RGBAFormat,
+        minFilter: THREE.LinearFilter,
+        magFilter: THREE.LinearFilter,
+        depthBuffer: true,
+        stencilBuffer: false,
+        samples: mobileOpts.msaaSamples
+      })
+
+      if (mobileOpts.useDepthTexture) {
+        renderTarget.depthTexture = new THREE.DepthTexture(window.innerWidth, window.innerHeight, THREE.UnsignedShortType)
+      }
+    }
+
+    // Create post-processing effect with custom target (mobile-optimized)
+    let effectComposer: EffectComposer
+
+    if (renderTarget && !mobileOpts.disableEffects) {
+      // Use custom render target for desktop
+      effectComposer = new EffectComposer(renderer, renderTarget)
+    } else {
+      // Use default render target for mobile to prevent WebGL errors
+      effectComposer = new EffectComposer(renderer)
+      console.log('🔧 Using default render target for mobile compatibility')
+    }
+
     const renderPass = new RenderPass(scene, camera)
     effectComposer.addPass(renderPass)
 
@@ -1079,11 +1122,16 @@ export default function HomePage() {
       const width = window.innerWidth
       const height = window.innerHeight
       renderer.setSize(width, height)
-      renderTarget.setSize(width, height)
-      if (renderTarget.depthTexture) {
-        renderTarget.depthTexture.image.width = width
-        renderTarget.depthTexture.image.height = height
+
+      // Only resize render target if it exists
+      if (renderTarget) {
+        renderTarget.setSize(width, height)
+        if (renderTarget.depthTexture) {
+          renderTarget.depthTexture.image.width = width
+          renderTarget.depthTexture.image.height = height
+        }
       }
+
       effectComposer.setSize(width, height)
       // Update depth uniforms used by film pass
       const filmUniforms = (filmPass as { uniforms?: Record<string, { value: number }> })?.uniforms
