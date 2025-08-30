@@ -1080,8 +1080,8 @@ export default function HomePage() {
 
       // Shooting star spawn/update
       const now = performance.now()
-      // More irregular spawn cadence
-      if (now - lastSpawnTime > THREE.MathUtils.randInt(1200, 8200)) {
+      // More irregular spawn cadence (doubled spawn rate)
+      if (now - lastSpawnTime > THREE.MathUtils.randInt(600, 4100)) {
         spawnShootingStar()
         lastSpawnTime = now
       }
