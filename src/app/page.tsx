@@ -373,7 +373,7 @@ export default function HomePage() {
 
     const filmPass = FilmGrainPass({
       noiseIntensity: () => mobileOpts.msaaSamples === 0
-        ? THREE.MathUtils.lerp(0.05, 0.1, Math.random())  // Higher film grain on mobile
+        ? THREE.MathUtils.lerp(0.08, 0.15, Math.random())  // Higher film grain on mobile
         : THREE.MathUtils.lerp(0.05, 0.1, Math.random()), // Normal film grain on desktop
       scanlineIntensity: () => 0,
       scanlineCount: () => 720.0,
