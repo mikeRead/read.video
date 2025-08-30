@@ -1,0 +1,29 @@
+# READ.VIDEO Landing Page Project
+
+This is a Next.js 15 project that creates an interactive space-themed landing page with:
+- Three.js space scene with randomly generated stars, planets, and rings
+- Countdown animation (READ.VIDE[3,2,1,O])
+- Typing text effect with email functionality
+- Interactive camera controls (mouse/touch drag + zoom)
+- Random camera movement through space
+
+## Project Structure
+```
+src/
+├── app/
+│   ├── page.tsx          # Main landing page with Three.js scene
+│   ├── layout.tsx        # Root layout (minimal, no default fonts)
+│   └── globals.css       # Custom styling (no Tailwind)
+└── components/           # React components (if needed)
+```
+
+## Key Technologies
+- **Next.js 15** with App Router
+- **Three.js** for 3D graphics
+- **TypeScript** for type safety
+- **Custom CSS** (no Tailwind CSS)
+- **Git** for version control
+description:
+globs:
+alwaysApply: false
+---

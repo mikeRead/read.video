@@ -1,0 +1,43 @@
+# Common Issues and Solutions
+
+## 1. Next.js Default Content Appearing
+**Problem**: Default Next.js template content (buttons, logos) still showing
+**Solution**: 
+- Remove all default SVG files from public/ directory
+- Clean up layout.tsx to remove default font imports
+- Use custom CSS overrides if needed
+- Clear .next build cache
+
+## 2. Git Commands Getting Stuck
+**Problem**: Git commands stuck in pager view requiring manual exit
+**Solution**: 
+- Run `git config --global core.pager cat`
+- Use `git --no-pager` prefix for specific commands
+- Avoid commands that output large amounts of text
+
+## 3. Three.js SSR Issues
+**Problem**: Three.js components causing server-side rendering errors
+**Solution**:
+- Use `dynamic` import with `{ ssr: false }`
+- Wrap Three.js code in `'use client'` directive
+- Handle component mounting/unmounting properly
+
+## 4. Camera Movement Conflicts
+**Problem**: User controls interfering with automatic movement
+**Solution**:
+- Maintain separate variables for automatic vs. user control
+- Use smooth interpolation for user input
+- Keep automatic movement running in background
+- Implement proper event handling cleanup
+
+## 5. Performance Issues
+**Problem**: Too many stars/planets causing lag
+**Solution**:
+- Limit star count to 25,000
+- Limit planet count to 15
+- Use efficient Three.js geometries
+- Implement proper disposal of Three.js objects
+description:
+globs:
+alwaysApply: false
+---

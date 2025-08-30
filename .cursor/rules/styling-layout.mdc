@@ -1,0 +1,25 @@
+# Styling and Layout Rules
+
+## CSS Approach
+- Use custom CSS, NOT Tailwind CSS
+- Ensure black background (`background-color: black`)
+- Implement proper z-index layering for overlays
+- Use absolute positioning for centered elements
+- Maintain responsive design for all screen sizes
+
+## Animation and Timing
+- Countdown: 3→2→1→O over 3 seconds
+- Space scene fade-in: 2 seconds after countdown
+- Typing effect: 100ms base speed with delays for special characters
+- Random messages: 2s delay after email copy, 4s total cycle
+
+## Visual Elements
+- Maintain black space theme throughout
+- Ensure proper contrast for text elements
+- Use consistent spacing and positioning
+- Implement smooth transitions and animations
+- Keep UI elements minimal and unobtrusive
+description:
+globs:
+alwaysApply: false
+---

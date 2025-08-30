@@ -1,0 +1,35 @@
+# Testing Checklist
+
+## Core Functionality
+- [ ] Countdown animation works correctly
+- [ ] Space scene fades in after countdown
+- [ ] Camera moves automatically through space
+- [ ] Mouse drag rotates camera smoothly
+- [ ] Touch drag works on mobile devices
+- [ ] Mouse wheel zooms in/out
+
+## User Interface
+- [ ] Email typing effect works
+- [ ] Click-to-copy functionality works
+- [ ] Random messages display correctly
+- [ ] No Next.js default content visible
+- [ ] Black background maintained
+- [ ] Responsive on all screen sizes
+
+## Performance
+- [ ] Smooth 60fps animation
+- [ ] No memory leaks
+- [ ] Proper cleanup on unmount
+- [ ] Responsive camera controls
+- [ ] Efficient rendering
+
+## Cross-Platform
+- [ ] Works on desktop browsers
+- [ ] Works on mobile devices
+- [ ] Touch controls responsive
+- [ ] Mouse controls smooth
+- [ ] Keyboard accessibility
+description:
+globs:
+alwaysApply: false
+---

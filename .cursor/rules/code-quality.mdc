@@ -1,0 +1,32 @@
+# Code Quality Standards
+
+## TypeScript
+- Use proper types for all variables
+- Avoid `any` type - use specific interfaces
+- Implement proper error handling
+- Use strict mode
+
+## React Best Practices
+- Use functional components with hooks
+- Implement proper cleanup in useEffect
+- Avoid unnecessary re-renders
+- Use refs for DOM manipulation
+- Handle component mounting/unmounting properly
+
+## Three.js Best Practices
+- Dispose of geometries, materials, and renderers
+- Handle window resize events
+- Implement proper camera constraints
+- Use efficient rendering loops
+- Use dynamic imports with `{ ssr: false }` for Three.js
+
+## General Code Standards
+- Write clean, readable code
+- Use meaningful variable names
+- Comment complex logic
+- Follow consistent formatting
+- Test functionality before committing
+description:
+globs:
+alwaysApply: false
+---

@@ -1,0 +1,33 @@
+# Three.js Implementation Rules
+
+## Core Requirements
+- Always use `'use client'` directive for Three.js components
+- Implement proper cleanup in useEffect return functions
+- Use refs for DOM mounting and Three.js objects
+- Handle window resize events properly
+- Implement smooth camera controls with easing
+
+## Camera Controls
+- Maintain both automatic random movement AND user interaction
+- Use slow easing (0.002 multiplier) for smooth user control
+- Implement proper touch event handling for mobile
+- Prevent camera flipping with rotation constraints
+- Keep zoom functionality with mouse wheel
+
+## Performance Optimization
+- Limit star count to 25,000
+- Limit planet count to 15
+- Use efficient Three.js geometries
+- Implement proper disposal of Three.js objects
+- Handle window resize events efficiently
+
+## Event Handling
+- Always remove event listeners in cleanup
+- Use passive: false for touch events when needed
+- Prevent default behavior when appropriate
+- Handle both mouse and touch events
+- Implement proper touch event handling for mobile devices
+description:
+globs:
+alwaysApply: false
+---

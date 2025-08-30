@@ -1,0 +1,183 @@
+/* Basic reset and override */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  font-family: sans-serif;
+  background-color: black;
+  color: white;
+}
+
+/* Ensure canvas starts hidden */
+canvas {
+  display: block;
+  opacity: 0;
+}
+
+/* Fade in animation for canvas */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+.fade-in-canvas {
+  animation: fadeIn 2s;
+  opacity: 1;
+}
+
+/* Header positioning */
+.header {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: white;
+  z-index: 100;
+}
+
+.header h1 {
+  font-size: 3em;
+  margin: 0;
+  text-shadow:
+    6px 6px 20px rgba(0, 0, 0, 0.4),
+    -6px -6px 20px rgba(0, 0, 0, 0.4),
+    6px -6px 20px rgba(0, 0, 0, 0.4),
+    -6px 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.header h2 {
+  font-size: 1em;
+  margin: 0;
+  height: 30px;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 200;
+  text-shadow:
+    3px 3px 15px rgba(0, 0, 0, 0.4),
+    -3px -3px 15px rgba(0, 0, 0, 0.4),
+    3px -3px 15px rgba(0, 0, 0, 0.4),
+    -3px 3px 15px rgba(0, 0, 0, 0.4);
+}
+
+/* Blinking animation */
+@keyframes blink {
+  0% {
+    color: #1a1a1a;
+  }
+
+  50% {
+    color: red;
+  }
+
+  100% {
+    color: #1a1a1a;
+  }
+}
+
+.blink {
+  color: red;
+  animation: blink 0.6s infinite;
+}
+
+.subHeader {
+  font-family: "Sixtyfour", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 100;
+  font-style: normal;
+  cursor: pointer;
+  text-shadow:
+    3px 3px 15px rgba(0, 0, 0, 0.4),
+    -3px -3px 15px rgba(0, 0, 0, 0.4),
+    3px -3px 15px rgba(0, 0, 0, 0.4),
+    -3px 3px 15px rgba(0, 0, 0, 0.4);
+}
+
+.subHeader:hover {
+  color: white;
+}
+
+#blink {
+  color: #2b2b2b;
+}
+
+.countdown-padding {
+  padding-left: 8px;
+}
+
+/* Film grain effect using noise texture image */
+.film-grain {
+  display: none !important;
+  content: "";
+  background-image: url("https://upload.wikimedia.org/wikipedia/commons/7/76/1k_Dissolve_Noise_Texture.png");
+  height: 300%;
+  width: 300%;
+  position: fixed;
+  top: -100%;
+  left: -50%;
+  opacity: 0;
+  animation: animateGrain 1s linear infinite;
+  transition: opacity 1s ease-in-out;
+  pointer-events: none;
+  z-index: 9999;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: pixelated;
+  filter: blur(0.5px);
+  mix-blend-mode: screen;
+}
+
+@keyframes animateGrain {
+
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+
+  10% {
+    transform: translate(-5%, -10%);
+  }
+
+  20% {
+    transform: translate(-15%, -20%);
+  }
+
+  30% {
+    transform: translate(-5%, -10%);
+  }
+
+  40% {
+    transform: translate(-15%, -20%);
+  }
+
+  50% {
+    transform: translate(-5%, -10%);
+  }
+
+  60% {
+    transform: translate(-15%, -20%);
+  }
+
+  70% {
+    transform: translate(-5%, -10%);
+  }
+
+  80% {
+    transform: translate(-15%, -20%);
+  }
+
+  90% {
+    transform: translate(-5%, -10%);
+  }
+}

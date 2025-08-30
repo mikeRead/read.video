@@ -1,0 +1,33 @@
+# Deployment and Future Enhancements
+
+## Deployment Notes
+- Configure for static export (`output: 'export'`)
+- Optimize for Cloudflare Pages
+- Ensure all assets are properly bundled
+- Test production build locally before deployment
+- Use `npm run export` for static site generation
+
+## Future Enhancements
+- Add more interactive elements to space scene
+- Implement particle effects for stars
+- Add sound effects for interactions
+- Create loading states for better UX
+- Add accessibility features
+- Implement analytics tracking
+
+## Development Workflow
+- Use `npm run dev` for local development
+- Use `npm run build` for production build
+- Use `npm run export` for static export
+- Test functionality before committing
+- Use descriptive commit messages
+
+## Git Workflow
+- Use `git config --global core.pager cat` to prevent pager issues
+- Commit frequently with descriptive messages
+- Always clean up event listeners in useEffect cleanup
+- Test functionality before committing
+description:
+globs:
+alwaysApply: false
+---
