@@ -92,7 +92,7 @@ canvas {
 }
 
 .subHeader {
-  font-family: "Sixtyfour", sans-serif;
+  font-family: "Sixtyfour", "Courier New", "Monaco", "Menlo", "Consolas", "Roboto Mono", monospace;
   font-optical-sizing: auto;
   font-weight: 100;
   font-style: normal;

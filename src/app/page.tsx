@@ -6,12 +6,27 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js'
 import { FilmGrainPass } from './FilmGrainPass'
+import {
+  getMobileOptimizations,
+  createMobileRenderer,
+  handleWebGLContextLoss,
+  optimizeForMobile,
+  debugMobileOptimizations,
+  optimizeFontsForMobile
+} from './mobileOptimizations'
 
 export default function HomePage() {
   const mountRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!mountRef.current) return
+
+    // Get mobile optimizations and apply them
+    const mobileOpts = getMobileOptimizations()
+    debugMobileOptimizations() // This will show the console log you're looking for
+
+    // Apply mobile font optimizations
+    optimizeFontsForMobile()
 
     // Set up the threejs scene
     const scene = new THREE.Scene()
@@ -25,7 +40,7 @@ export default function HomePage() {
 
     const directionalLight = new THREE.DirectionalLight(0xffffff, 1)  // Sunlight
     directionalLight.position.set(1000, 500, 1000)
-    directionalLight.castShadow = true
+    directionalLight.castShadow = mobileOpts.enableShadows
     scene.add(directionalLight)
 
     // Nebula system removed - back to clean space scene
@@ -33,6 +48,9 @@ export default function HomePage() {
     // Set up the camera with optimized clipping planes to improve depth precision
     const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 50000)
     camera.updateProjectionMatrix()
+
+    // Apply mobile optimizations to scene and camera
+    optimizeForMobile(scene, camera)
 
     // --- Color palette helpers ---
     const rand = (a: number = 0, b: number = 1) => a + Math.random() * (b - a)
@@ -223,11 +241,11 @@ export default function HomePage() {
 
 
 
-    // Set up the renderer with enhanced anti-aliasing and depth buffer
+    // Set up the renderer with mobile-optimized settings
     const renderer = new THREE.WebGLRenderer({
-      antialias: true,
-      powerPreference: "high-performance",
-      logarithmicDepthBuffer: true,  // Dramatically improves depth precision
+      antialias: mobileOpts.msaaSamples > 0,
+      powerPreference: mobileOpts.disableEffects ? "default" : "high-performance",
+      logarithmicDepthBuffer: !mobileOpts.disableEffects,  // Can cause issues on mobile
       stencil: false,
       depth: true,
       alpha: false,
@@ -240,11 +258,17 @@ export default function HomePage() {
     renderer.outputColorSpace = THREE.SRGBColorSpace
     renderer.toneMapping = THREE.ACESFilmicToneMapping
     renderer.toneMappingExposure = 1.0
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-    renderer.shadowMap.enabled = false
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap
+    renderer.setPixelRatio(mobileOpts.disableEffects ? Math.min(window.devicePixelRatio, 1) : Math.min(window.devicePixelRatio, 2))
+    renderer.shadowMap.enabled = mobileOpts.enableShadows
+    renderer.shadowMap.type = mobileOpts.enableShadows ? THREE.PCFSoftShadowMap : THREE.BasicShadowMap
     renderer.setSize(window.innerWidth, window.innerHeight)
     mountRef.current.appendChild(renderer.domElement)
+
+    // Add WebGL context loss handling for mobile
+    handleWebGLContextLoss(renderer, () => {
+      console.warn('WebGL context lost - attempting to recreate scene')
+      // You could implement scene recreation logic here
+    })
 
     // Create color enhancement shader
     const colorEnhancementShader = {
@@ -291,15 +315,15 @@ export default function HomePage() {
       `
     }
 
-    // Create high-precision render target to reduce banding
+    // Create high-precision render target to reduce banding (mobile-optimized)
     const renderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, {
-      type: THREE.HalfFloatType,
+      type: mobileOpts.useHalfFloat ? THREE.HalfFloatType : THREE.UnsignedByteType,
       format: THREE.RGBAFormat,
       minFilter: THREE.LinearFilter,
       magFilter: THREE.LinearFilter,
       depthBuffer: true,
       stencilBuffer: false,
-      samples: 4
+      samples: mobileOpts.msaaSamples
     })
     renderTarget.depthTexture = new THREE.DepthTexture(window.innerWidth, window.innerHeight, THREE.UnsignedShortType)
 
@@ -317,14 +341,14 @@ export default function HomePage() {
     let glitchDuration = 0
 
     const getAnimatedChroma = () => {
-      if (!isGlitchActive) return 0.0055 // Normal chroma
+      if (!isGlitchActive) return mobileOpts.chromaIntensity // Mobile-optimized normal chroma
 
       const elapsed = performance.now() - glitchStartTime
       const progress = elapsed / glitchDuration
 
-      // Create pulsing chroma effect during glitch
+      // Create pulsing chroma effect during glitch (mobile-optimized)
       const pulse = Math.sin(progress * Math.PI * 8) * 0.5 + 0.5 // 8 pulses over glitch duration
-      const intensity = THREE.MathUtils.lerp(0.01, 0.02, pulse) // Range: 0.008 to 0.025
+      const intensity = THREE.MathUtils.lerp(mobileOpts.chromaIntensity * 2, mobileOpts.chromaIntensity * 4, pulse)
 
       return intensity
     }
@@ -339,7 +363,7 @@ export default function HomePage() {
       glitchStrength: () => THREE.MathUtils.lerp(0.008, 0.02, Math.random()),
       glitchBandHeight: () => THREE.MathUtils.lerp(0.015, 0.06, Math.random()),
       glitchScrollSpeed: () => THREE.MathUtils.lerp(0.7, 1.1, Math.random()),
-      getGlitchIntervalSeconds: () => THREE.MathUtils.randFloat(1.0, 5.0),
+      getGlitchIntervalSeconds: () => THREE.MathUtils.randFloat(1.0, mobileOpts.glitchInterval / 1000),
       getGlitchDurationSeconds: () => THREE.MathUtils.randFloat(.5, .6)
     })
       ; (filmPass as { renderToScreen?: boolean }).renderToScreen = true
@@ -358,8 +382,8 @@ export default function HomePage() {
     // Create an array to hold our stars (original system)
     const stars: THREE.Vector3[] = []
 
-    // Create a loop to generate random stars (original: 25000 stars)
-    for (let i = 0; i < 25000; i++) {
+    // Create a loop to generate random stars (mobile-optimized count)
+    for (let i = 0; i < mobileOpts.maxStars; i++) {
       const star = new THREE.Vector3()
       star.x = THREE.MathUtils.randFloatSpread(50000)
       star.y = THREE.MathUtils.randFloatSpread(20000)
@@ -418,7 +442,7 @@ export default function HomePage() {
       return texture
     }
 
-    const starSpriteTexture = generateStarTexture(128)
+    const starSpriteTexture = generateStarTexture(mobileOpts.textureSize)
     const starSpriteMaterial = new THREE.SpriteMaterial({
       map: starSpriteTexture,
       color: 0xffffff,
@@ -428,7 +452,7 @@ export default function HomePage() {
     })
 
     // ---------------- Small particles (dust) ----------------
-    const particleCount = 4000
+    const particleCount = mobileOpts.maxParticles
     const particleRange = 5000
     const particlePositions = new Float32Array(particleCount * 3)
     for (let i = 0; i < particleCount; i++) {
@@ -694,8 +718,8 @@ export default function HomePage() {
     // Create the random planet
     const randomPlanet = createRandomPlanet()
 
-    // Add some random planets with rings initially (reduced)
-    for (let i = 0; i < 5; i++) {
+    // Add some random planets with rings initially (mobile-optimized count)
+    for (let i = 0; i < mobileOpts.maxPlanets; i++) {
       addRandomPlanetWithRings()
     }
 
@@ -1312,9 +1336,7 @@ export default function HomePage() {
         }
       `}</style>
 
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-      <link href="https://fonts.googleapis.com/css2?family=Sixtyfour:SCAN@-37&display=swap" rel="stylesheet" />
+
 
       <div className="header">
         <h1>READ<span className="" id="blink">.</span>VIDE<span id="countdown" className="countdown-padding">3</span></h1>

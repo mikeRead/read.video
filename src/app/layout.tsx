@@ -6,6 +6,16 @@ export const metadata: Metadata = {
   description: "Interactive space-themed landing page",
 };
 
+// Preload Google Fonts for better performance
+const fontLinks = [
+  { rel: "preconnect", href: "https://fonts.googleapis.com" },
+  { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "" },
+  {
+    rel: "stylesheet",
+    href: "https://fonts.googleapis.com/css2?family=Sixtyfour:SCAN@-37&display=swap"
+  }
+];
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -13,6 +23,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        {fontLinks.map((link, index) => (
+          <link key={index} {...link} />
+        ))}
+      </head>
       <body>
         {children}
       </body>
