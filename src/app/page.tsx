@@ -110,7 +110,7 @@ export default function HomePage() {
         uColorLo: { value: new THREE.Color('#070a14') },
         uColors: { value: palette },
         uAccent: { value: new THREE.Color(accent) },
-        uAccentStrength: { value: 0.12 },
+        uAccentStrength: { value: 0.25 },
       },
       vertexShader: /* glsl */`
         varying vec3 vDir;
@@ -280,9 +280,9 @@ export default function HomePage() {
     const colorEnhancementShader = {
       uniforms: {
         tDiffuse: { value: 1 },
-        saturation: { value: 1.0 },
-        contrast: { value: 1.0 },
-        brightness: { value: 1.0 }
+        saturation: { value: 1 },
+        contrast: { value: 1 },
+        brightness: { value: 1.5 }
       },
       vertexShader: `
         varying vec2 vUv;
