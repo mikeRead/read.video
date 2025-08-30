@@ -83,13 +83,19 @@ export default function HomePage() {
     }
 
     function makeAccent(baseHue: number) {
-      const hue = baseHue + (Math.random() < 0.5 ? 60 : -60)
-      return hsl(hue, 0.65, 0.30) // subtle, slightly brighter accent
+      // First accent: same tone as base, medium brightness
+      return hsl(baseHue, 0.65, 0.40) // same hue, medium saturation, medium lightness
+    }
+
+    function makeAccent2(baseHue: number) {
+      // Second accent: same tone as base, much whiter
+      return hsl(baseHue, 0.25, 0.85) // same hue, lower saturation, much higher lightness
     }
 
     const baseHue = rand(180, 340)
     const palette = makeSimplePalette(baseHue)
     const accent = makeAccent(baseHue)
+    const accent2 = makeAccent2(baseHue)
 
     // Create realistic nebula background using advanced procedural shader (multi-color + galactic band)
     const nebulaMat = new THREE.ShaderMaterial({
@@ -110,6 +116,7 @@ export default function HomePage() {
         uColorLo: { value: new THREE.Color('#070a14') },
         uColors: { value: palette },
         uAccent: { value: new THREE.Color(accent) },
+        uAccent2: { value: new THREE.Color(accent2) },
         uAccentStrength: { value: 0.25 },
       },
       vertexShader: /* glsl */`
@@ -157,6 +164,7 @@ export default function HomePage() {
         uniform vec3  uColorLo;
         uniform vec3  uColors[4];
         uniform vec3  uAccent;
+        uniform vec3  uAccent2;
         uniform float uAccentStrength;
         uniform vec3  uBandDir;
         uniform float uBandWidth, uBandSharp, uBandBoost;
@@ -217,9 +225,14 @@ export default function HomePage() {
           // Emphasize the band, dim outside regions slightly
           vec3 col = mix(nebCol, bandCol, band * uBandBoost);
           col *= mix(0.7, 1.0, bandEmph);
-          // Add faint accent only near the band peaks
+          // Add dual accent colors for better blending near the band peaks
           float accentMask = pow(band, 3.0) * smoothstep(0.7, 1.0, mask);
+          float accentMask2 = pow(band, 2.5) * smoothstep(0.6, 0.9, mask);
+          
+          // Blend first accent color
           col = mix(col, uAccent, accentMask * uAccentStrength);
+          // Blend second accent color with slightly different mask for depth
+          col = mix(col, uAccent2, accentMask2 * uAccentStrength * 0.7);
           
           // Blend toward deep space based on inverse space to keep gaps
           col = mix(uColorLo, col, max(space, 0.2));
