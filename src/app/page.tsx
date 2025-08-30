@@ -373,7 +373,7 @@ export default function HomePage() {
 
     const filmPass = FilmGrainPass({
       noiseIntensity: () => mobileOpts.msaaSamples === 0
-        ? THREE.MathUtils.lerp(0.1, 0.5, Math.random())  // Higher film grain on mobile
+        ? THREE.MathUtils.lerp(0.05, 0.1, Math.random())  // Higher film grain on mobile
         : THREE.MathUtils.lerp(0.05, 0.1, Math.random()), // Normal film grain on desktop
       scanlineIntensity: () => 0,
       scanlineCount: () => 720.0,
@@ -381,7 +381,7 @@ export default function HomePage() {
       chroma: getAnimatedChroma,
       jitter: () => 0,
       glitchStrength: () => mobileOpts.msaaSamples === 0
-        ? THREE.MathUtils.lerp(0.08, 0.1, Math.random())
+        ? THREE.MathUtils.lerp(0.2, 0.3, Math.random())
         : THREE.MathUtils.lerp(0.04, 0.05, Math.random()),
       glitchBandHeight: () => THREE.MathUtils.lerp(0.015, 0.06, Math.random()),
       glitchScrollSpeed: () => THREE.MathUtils.lerp(0.7, 1.1, Math.random()),
