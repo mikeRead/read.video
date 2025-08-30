@@ -16,16 +16,17 @@ export const setupMobileErrorHandling = () => {
         return false
     }
 
-    // Check for common mobile WebGL limitations
-    const debugInfo = gl.getExtension('WEBGL_debug_renderer_info')
+        // Check for common mobile WebGL limitations
+    const webgl = gl as WebGLRenderingContext
+    const debugInfo = webgl.getExtension('WEBGL_debug_renderer_info')
     if (debugInfo) {
-        const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL)
-        console.log('WebGL Renderer:', renderer)
-
-        // Check for known problematic mobile GPUs
-        if (renderer.includes('Mali') || renderer.includes('PowerVR') || renderer.includes('Adreno')) {
-            console.warn('Mobile GPU detected - applying optimizations')
-        }
+      const renderer = webgl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL)
+      console.log('WebGL Renderer:', renderer)
+      
+      // Check for known problematic mobile GPUs
+      if (renderer.includes('Mali') || renderer.includes('PowerVR') || renderer.includes('Adreno')) {
+        console.warn('Mobile GPU detected - applying optimizations')
+      }
     }
 
     return true

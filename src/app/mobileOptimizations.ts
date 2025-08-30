@@ -18,13 +18,12 @@ export const isAndroid = () => {
 }
 
 export const getMobileOptimizations = () => {
-    const mobile = isMobile()
-    const android = isAndroid()
-
-    // Show mobile indicator if mobile mode is active
-    if (mobile) {
-        showMobileIndicator()
-    }
+  const mobile = isMobile()
+  
+  // Show mobile indicator if mobile mode is active
+  if (mobile) {
+    showMobileIndicator()
+  }
 
     return {
         // Reduce star count on mobile

@@ -8,7 +8,6 @@ import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js'
 import { FilmGrainPass } from './FilmGrainPass'
 import {
   getMobileOptimizations,
-  createMobileRenderer,
   handleWebGLContextLoss,
   optimizeForMobile,
   debugMobileOptimizations,
