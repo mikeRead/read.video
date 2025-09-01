@@ -396,7 +396,7 @@ export default function HomePage() {
       glitchStrength: () => mobileOpts.msaaSamples === 0
         ? THREE.MathUtils.lerp(0.15, 0.3, Math.random())
         : THREE.MathUtils.lerp(0.04, 0.07, Math.random()),
-      glitchBandHeight: () => THREE.MathUtils.lerp(0.015, 0.06, Math.random()),
+      glitchBandHeight: () => THREE.MathUtils.lerp(0.035, 0.06, Math.random()),
       glitchScrollSpeed: () => THREE.MathUtils.lerp(0.7, 1.1, Math.random()),
       getGlitchIntervalSeconds: () => THREE.MathUtils.randFloat(1.0, 10.0),
       getGlitchDurationSeconds: () => THREE.MathUtils.randFloat(.3, .6)
