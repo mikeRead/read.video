@@ -137,7 +137,9 @@ export function FilmGrainPass(options: Record<string, unknown> = {}) {
         col.a = 1.0;
 
         float n = rand(uv * (time * 60.0) + vec2(time*1.231, time*2.123));
-        col.rgb += (n - 0.5) * noiseIntensity;
+        // Increase film grain by 2x when glitch is active
+        float grainIntensity = glitchActive > 0.5 ? noiseIntensity * 5.0 : noiseIntensity;
+        col.rgb += (n - 0.5) * grainIntensity;
 
         float scan = sin(uv.y * scanlineCount + time * 6.28318);
         col.rgb -= scanlineIntensity * 0.5 * (scan * 0.5 + 0.5);

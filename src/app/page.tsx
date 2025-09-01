@@ -372,7 +372,7 @@ export default function HomePage() {
       // Disable chroma on mobile to prevent visual issues
       if (mobileOpts.msaaSamples === 0) return 0
 
-      if (!isGlitchActive) return 0.005 // Normal chroma
+      if (!isGlitchActive) return 0 // Normal chroma
 
       const elapsed = performance.now() - glitchStartTime
       const progress = elapsed / glitchDuration
