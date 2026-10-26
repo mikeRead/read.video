@@ -46,10 +46,13 @@ canvas {
   text-align: center;
   color: white;
   z-index: 100;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .header h1 {
-  font-size: 3em;
+  font-size: 4.4em;
   margin: 0;
   text-shadow:
     6px 6px 20px rgba(0, 0, 0, 0.4),
@@ -59,9 +62,9 @@ canvas {
 }
 
 .header h2 {
-  font-size: 1em;
+  font-size: 1.45em;
   margin: 0;
-  height: 30px;
+  height: 44px;
   color: rgba(255, 255, 255, 0.7);
   font-weight: 200;
   text-shadow:
@@ -92,11 +95,14 @@ canvas {
 }
 
 .subHeader {
-  font-family: "Sixtyfour", "Courier New", "Monaco", "Menlo", "Consolas", "Roboto Mono", monospace;
+  font-family: var(--font-sixtyfour), "Courier New", "Monaco", "Menlo", "Consolas", "Roboto Mono", monospace;
+  /* Bleed the pixel blocks solid — kills the white hairlines through glyphs */
+  font-variation-settings: "BLED" 28;
   font-optical-sizing: auto;
   font-weight: 100;
   font-style: normal;
   cursor: pointer;
+  pointer-events: auto;
   text-shadow:
     3px 3px 15px rgba(0, 0, 0, 0.4),
     -3px -3px 15px rgba(0, 0, 0, 0.4),
@@ -116,68 +122,5 @@ canvas {
   padding-left: 8px;
 }
 
-/* Film grain effect using noise texture image */
-.film-grain {
-  display: none !important;
-  content: "";
-  background-image: url("https://upload.wikimedia.org/wikipedia/commons/7/76/1k_Dissolve_Noise_Texture.png");
-  height: 300%;
-  width: 300%;
-  position: fixed;
-  top: -100%;
-  left: -50%;
-  opacity: 0;
-  animation: animateGrain 1s linear infinite;
-  transition: opacity 1s ease-in-out;
-  pointer-events: none;
-  z-index: 9999;
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: -moz-crisp-edges;
-  image-rendering: pixelated;
-  filter: blur(0.5px);
-  mix-blend-mode: screen;
-}
-
-@keyframes animateGrain {
-
-  0%,
-  100% {
-    transform: translate(0, 0);
-  }
-
-  10% {
-    transform: translate(-5%, -10%);
-  }
-
-  20% {
-    transform: translate(-15%, -20%);
-  }
-
-  30% {
-    transform: translate(-5%, -10%);
-  }
-
-  40% {
-    transform: translate(-15%, -20%);
-  }
-
-  50% {
-    transform: translate(-5%, -10%);
-  }
-
-  60% {
-    transform: translate(-15%, -20%);
-  }
-
-  70% {
-    transform: translate(-5%, -10%);
-  }
-
-  80% {
-    transform: translate(-15%, -20%);
-  }
-
-  90% {
-    transform: translate(-5%, -10%);
-  }
-}
+/* Film grain is rendered in the WebGL post-processing pass (CRT shader);
+   the old DOM-based .film-grain overlay (display:none + remote texture) was removed. */

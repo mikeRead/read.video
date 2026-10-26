@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Sixtyfour } from "next/font/google";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -6,15 +7,16 @@ export const metadata: Metadata = {
   description: "Interactive space-themed landing page",
 };
 
-// Preload Google Fonts for better performance
-const fontLinks = [
-  { rel: "preconnect", href: "https://fonts.googleapis.com" },
-  { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" as const },
-  { 
-    rel: "stylesheet", 
-    href: "https://fonts.googleapis.com/css2?family=Sixtyfour:SCAN@-37&display=swap" 
-  }
-];
+// Self-hosted at build time — replaces the render-blocking Google Fonts
+// stylesheet + preconnects. BLED axis bleeds the pixel blocks together so the
+// glyphs render solid (no hairline gaps on the pixel grid); SCAN stays off.
+const sixtyfour = Sixtyfour({
+  subsets: ["latin"],
+  weight: "variable",
+  axes: ["BLED"],
+  display: "swap",
+  variable: "--font-sixtyfour",
+});
 
 export default function RootLayout({
   children,
@@ -22,12 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <head>
-        {fontLinks.map((link, index) => (
-          <link key={index} {...link} />
-        ))}
-      </head>
+    <html lang="en" className={sixtyfour.variable}>
       <body>
         {children}
       </body>

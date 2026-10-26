@@ -6,6 +6,10 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true
   },
+  // Strip console noise from production builds, keep real error reporting
+  compiler: {
+    removeConsole: { exclude: ['error', 'warn'] }
+  },
   // Optimize for Cloudflare Pages
   experimental: {
     optimizePackageImports: ['three']
